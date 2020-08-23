@@ -5,6 +5,7 @@
 #include "param.h"
 #include "memlayout.h"
 #include "spinlock.h"
+#include "sysinfo.h"
 #include "proc.h"
 
 uint64
@@ -103,5 +104,25 @@ sys_trace(void)
 
   if(argint(0, &mask) < 0) return -1;
   myproc()->tracemask = mask;
+  return 0;
+}
+
+uint64
+sys_sysinfo(void)
+{
+  struct sysinfo sinfo;
+  uint64 uaddr;
+
+  if(argaddr(0, &uaddr) < 0) return -1;
+
+  // populate and copyout
+  // this might be better suited in its own C file, should sysinfo get bigger
+  // whatever, if it works it works
+  sinfo.freemem = countfreepages() * 4096;
+  sinfo.nproc = countproc();
+  
+  if(copyout(myproc()->pagetable, uaddr, (char *)&sinfo, sizeof(sinfo)) < 0)
+    return -1;
+
   return 0;
 }

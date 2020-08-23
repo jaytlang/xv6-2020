@@ -39,6 +39,24 @@ freerange(void *pa_start, void *pa_end)
     kfree(p);
 }
 
+// Count elements in the free list
+// Multiply the result by 4096 to get bytes of free memory
+int
+countfreepages(void)
+{
+   struct run *this;
+   int tally;
+
+   tally = 0;
+   this = kmem.freelist;
+   while(this){
+     this = this->next;
+     tally++;
+   }
+
+   return tally;
+}
+
 // Free the page of physical memory pointed at by v,
 // which normally should have been returned by a
 // call to kalloc().  (The exception is when
