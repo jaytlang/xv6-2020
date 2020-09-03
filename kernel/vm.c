@@ -440,3 +440,35 @@ copyinstr(pagetable_t pagetable, char *dst, uint64 srcva, uint64 max)
     return -1;
   }
 }
+
+void
+_vmprintrcsv(pagetable_t pagetable, int depth)
+{
+  int i, j;
+  pte_t pte;
+
+  for(i = 0; i < 512; i++){
+    pte = pagetable[i];
+    if(pte & PTE_V){
+      for(j = 0; j < depth; j++) printf(" ..");
+      printf("%d: pte %p pa %p\n", i, pte, PTE2PA(pte));
+
+      if((pte & (PTE_R|PTE_W|PTE_X)) == 0)
+        // recurse
+        _vmprintrcsv((pagetable_t)PTE2PA(pte), depth + 1);
+    }
+  } 
+
+  return;
+}
+  
+// Print out what the kernel page table looks like for debugging
+// Use the same recursion as freewalk() (kernel/vm.c:274)
+void
+vmprint(pagetable_t pagetable)
+{
+  printf("page table %p\n", pagetable);
+  _vmprintrcsv(pagetable, 1);
+  return;
+}
+

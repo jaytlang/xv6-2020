@@ -107,6 +107,10 @@ exec(char *path, char **argv)
     if(*s == '/')
       last = s+1;
   safestrcpy(p->name, last, sizeof(p->name));
+
+  // Print the new page table for debugging
+  // iff current process is init
+  if(p->pid == 1) vmprint(pagetable);
     
   // Commit to the user image.
   oldpagetable = p->pagetable;
